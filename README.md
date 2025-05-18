@@ -21,3 +21,5 @@ Subida y verificación de imágenes: Solo se permite subir entre 1 y 5 archivos 
 Paginación manual en el listado: La lista de actividades implementa paginación de 5 en 5 actividades manualmente, pasando el parámetro pagina por la URL y calculando los límites en el backend. Esto permite escalar fácilmente en el futuro.
 
 Diseño modular del código: Separé las funciones de validación, acceso a base de datos y lógica de Flask para facilitar el mantenimiento y posibles mejoras posteriores.
+
+Cambio de entorno y repositorio: Para esta tarea tuve que crear un nuevo repositorio, ya que en la Tarea 1 trabajé usando IntelliJ IDEA, pero ahora no me permite acceder correctamente al repositorio anterior. Por ello, realicé la Tarea 2 desde cero utilizando Visual Studio Code como entorno de desarrollo.
