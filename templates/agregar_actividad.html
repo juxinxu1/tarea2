@@ -1,0 +1,113 @@
+<!-- agregar_actividad.html corregido -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agregar Actividad</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <header>
+    <h1>Agregar Actividad</h1>
+    <a href="{{ url_for('index') }}">Volver a la portada</a>
+  </header>
+
+  <main>
+    <!-- Formulario principal -->
+    <form id="activity-form" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>¿Dónde?</legend>
+        <label for="region">Región:</label>
+        <select id="region" name="region" required></select>
+
+        <label for="comuna">Comuna:</label>
+        <select id="comuna" name="comuna" required></select>
+
+        <label for="sector">Sector:</label>
+        <input type="text" id="sector" name="sector" maxlength="100" placeholder="(opcional)">
+      </fieldset>
+
+      <fieldset>
+        <legend>¿Quién organiza?</legend>
+        <label for="organizador_nombre">Nombre:</label>
+        <input type="text" id="organizador_nombre" name="organizador_nombre" required maxlength="200">
+
+        <label for="organizador_email">Email:</label>
+        <input type="email" id="organizador_email" name="organizador_email" required maxlength="100">
+
+        <label for="organizador_telefono">Número de celular:</label>
+        <input type="tel" id="organizador_telefono" name="organizador_telefono" pattern="^\+569\d{8}$" placeholder="+56912345678">
+
+        <label for="contactar_por">Contactar por:</label>
+        <select id="contactar_por" name="contactar_por">
+          <option value="whatsapp">WhatsApp</option>
+          <option value="telegram">Telegram</option>
+          <option value="X">X</option>
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="otra">Otra</option>
+        </select>
+
+        <div id="otro_contacto_container" style="display:none;">
+          <label for="otro_contacto">ID o URL de red social:</label>
+          <input type="text" id="otro_contacto" name="otro_contacto" minlength="4" maxlength="50">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>¿Cuándo y de qué trata?</legend>
+        <label for="inicio">Día y hora inicio:</label>
+        <input type="datetime-local" id="inicio" name="inicio" required>
+
+        <label for="termino">Día y hora término:</label>
+        <input type="datetime-local" id="termino" name="termino">
+
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion" name="descripcion" cols="50" rows="10"></textarea>
+
+        <label for="tema">Tema:</label>
+        <select id="tema" name="tema" required>
+          <option value="música">Música</option>
+          <option value="deporte">Deporte</option>
+          <option value="ciencias">Ciencias</option>
+          <option value="religión">Religión</option>
+          <option value="política">Política</option>
+          <option value="tecnología">Tecnología</option>
+          <option value="juegos">Juegos</option>
+          <option value="baile">Baile</option>
+          <option value="comida">Comida</option>
+          <option value="otro">Otro</option>
+        </select>
+
+        <div id="otro_tema_container" style="display:none;">
+          <label for="otro_tema">Especifique el tema:</label>
+          <input type="text" id="otro_tema" name="otro_tema" minlength="3" maxlength="15">
+        </div>
+
+        <label>Fotos (mínimo 1, máximo 5):</label>
+        <div id="fotos_container">
+          <input type="file" name="fotos[]" accept="image/*" required>
+        </div>
+        <button type="button" id="agregar_foto">Agregar otra foto</button>
+      </fieldset>
+
+      <button type="submit" id="submit_activity">Agregar esta actividad</button>
+    </form>
+
+    <!-- Confirmación antes de enviar -->
+    <div id="confirmation" style="display:none;">
+      <p>¿Está seguro que desea agregar esta actividad?</p>
+      <button type="button" id="confirm_yes">Sí, estoy seguro</button>
+      <button type="button" id="confirm_no">No, quiero volver al formulario</button>
+    </div>
+
+    <div id="final_message" style="display:none;">
+      <p>Hemos recibido su información, muchas gracias y suerte en su actividad.</p>
+      <a href="{{ url_for('index') }}"><button>Volver a la portada</button></a>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

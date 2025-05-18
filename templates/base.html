@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Actividades{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Actividades</h1>
+        <nav class="navbar">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <a href="{{ url_for('agregar_actividad') }}">Agregar Actividad</a>
+            <a href="{{ url_for('lista_actividades') }}">Ver Actividades</a>
+            <a href="{{ url_for('estadisticas') }}">Estadísticas</a>
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 - Tarea 2 - Actividades Sociales</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Listado de Actividades{% endblock %}
+
+{% block content %}
+<h2>Listado de Actividades Recientes</h2>
+
+<div class="actividades">
+    {% for actividad in actividades %}
+        <div class="activity-card">
+            <img src="{{ url_for('static', filename=actividad.ruta_archivo | replace('static/', '')) }}" alt="Imagen">
+            <h3>{{ actividad.nombre }}</h3>
+            <p><strong>Fecha:</strong> {{ actividad.dia_hora_inicio }}</p>
+            <p><strong>Tema:</strong> 
+                {% if actividad.tema == 'otro' %}
+                    {{ actividad.glosa_otro }}
+                {% else %}
+                    {{ actividad.tema }}
+                {% endif %}
+        </p>
+        <p><strong>Organiza:</strong> {{ actividad.nombre }}</p>
+        <p><strong>Email:</strong> {{ actividad.email }}</p>
+        <p><strong>Celular:</strong> {{ actividad.celular or 'No informado' }}</p>
+        <p><strong>Contacto por:</strong> {{ actividad.red_social }} - {{ actividad.contacto }}</p>
+        <p><strong>Ubicación:</strong> {{ actividad.sector or 'Sin sector' }}, {{ actividad.comuna }}, {{ actividad.region }}</p>
+        <p>{{ actividad.descripcion }}</p>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

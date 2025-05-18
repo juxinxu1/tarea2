@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Actividades{% endblock %}
+
+{% block content %}
+<main>
+  <h1>Bienvenido a la plataforma de actividades</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flash-messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <section class="ultimas-actividades">
+    <h2>Últimas actividades</h2>
+    {% if actividades %}
+      <div class="actividad-lista">
+        {% for act in actividades %}
+          <div class="actividad-item">
+            <h3>{{ act.nombre }}</h3>
+            <p><strong>Fecha:</strong> {{ act.dia_hora_inicio }}</p>
+            <p><strong>Ubicación:</strong> {{ act.sector }}, {{ act.comuna }}, {{ act.region }}</p>
+            <p><strong>Descripción:</strong> {{ act.descripcion }}</p>
+
+            {% if act.tema %}
+              <p><strong>Tema:</strong> {{ act.tema }}{% if act.tema == "Otro" and act.glosa_otro %} - {{ act.glosa_otro }}{% endif %}</p>
+            {% endif %}
+
+            {% if act.ruta_archivo %}
+              <img src="{{ url_for('static', filename=act.ruta_archivo.split('static/')[1]) }}" alt="Imagen de actividad" width="200">
+            {% endif %}
+
+            <p><strong>Contacto:</strong></p>
+            <ul>
+              <li>Email: {{ act.email }}</li>
+              <li>Celular: {{ act.celular }}</li>
+              {% if act.red_social and act.contacto %}
+                <li>{{ act.red_social }}: {{ act.contacto }}</li>
+              {% endif %}
+            </ul>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No hay actividades registradas aún.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
+

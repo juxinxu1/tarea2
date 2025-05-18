@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estadísticas</title>
+  <!-- Carga correcta de styles.css -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Estadísticas</h1>
+    <a href="{{ url_for('index') }}">Volver a la portada</a>
+  </header>
+
+  <main>
+    <section id="estadisticas-charts">
+      <h2>Gráfico de Líneas: Actividades por Día</h2>
+      <canvas id="chart-line"></canvas>
+
+      <h2>Gráfico de Torta: Actividades por Tipo</h2>
+      <canvas id="chart-pie"></canvas>
+
+      <h2>Gráfico de Barras: Actividades por Mes y Horario</h2>
+      <canvas id="chart-bar"></canvas>
+    </section>
+    <a href="{{ url_for('index') }}" class="back-link">Volver a la portada</a>
+  </main>
+
+  <!-- Se incluye Chart.js desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Carga correcta del script.js -->
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
+
