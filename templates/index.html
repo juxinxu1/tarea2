@@ -21,7 +21,7 @@
     {% if actividades %}
       <div class="actividad-lista">
         {% for act in actividades %}
-          <div class="actividad-item">
+          <div class="actividad-item" id="actividad-{{ act.id }}">
             <h3>{{ act.nombre }}</h3>
             <p><strong>Fecha:</strong> {{ act.dia_hora_inicio }}</p>
             <p><strong>Ubicación:</strong> {{ act.sector }}, {{ act.comuna }}, {{ act.region }}</p>
@@ -43,6 +43,25 @@
                 <li>{{ act.red_social }}: {{ act.contacto }}</li>
               {% endif %}
             </ul>
+
+            <!-- COMENTARIOS -->
+            <div class="comentarios">
+              <h4>Comentarios</h4>
+              <div id="comentarios-listado-{{ act.id }}">Cargando comentarios...</div>
+
+              <form class="form-comentario" data-actividad-id="{{ act.id }}">
+                <label>Nombre:</label><br>
+                <input type="text" name="nombre" required minlength="3" maxlength="80"><br><br>
+
+                <label>Comentario:</label><br>
+                <textarea name="texto" rows="4" cols="50" required minlength="5"></textarea><br><br>
+
+                <button type="submit">Agregar comentario</button>
+              </form>
+
+              <div class="errores" style="color: red;"></div>
+            </div>
+            <!-- FIN COMENTARIOS -->
           </div>
         {% endfor %}
       </div>
@@ -51,5 +70,77 @@
     {% endif %}
   </section>
 </main>
-{% endblock %}
 
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Cargar comentarios para cada actividad
+    document.querySelectorAll(".actividad-item").forEach(actividadDiv => {
+      const actividadId = actividadDiv.id.split("-")[1];
+      const comentariosDiv = document.getElementById("comentarios-listado-" + actividadId);
+      cargarComentarios(actividadId, comentariosDiv);
+    });
+
+    // Manejar formularios
+    document.querySelectorAll(".form-comentario").forEach(form => {
+      form.addEventListener("submit", async e => {
+        e.preventDefault();
+        const actividadId = form.dataset.actividadId;
+        const nombre = form.nombre.value.trim();
+        const texto = form.texto.value.trim();
+        const erroresDiv = form.parentElement.querySelector(".errores");
+
+        let errores = [];
+        if (nombre.length < 3 || nombre.length > 80) errores.push("El nombre debe tener entre 3 y 80 caracteres.");
+        if (texto.length < 5) errores.push("El comentario debe tener al menos 5 caracteres.");
+
+        if (errores.length > 0) {
+          erroresDiv.innerHTML = errores.join("<br>");
+          return;
+        }
+
+        try {
+          const res = await fetch(`/actividad/${actividadId}/comentarios`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, texto })
+          });
+
+          if (!res.ok) {
+            const data = await res.json();
+            erroresDiv.innerHTML = data.errores.join("<br>");
+            return;
+          }
+
+          form.reset();
+          erroresDiv.innerHTML = "";
+          const comentariosDiv = document.getElementById("comentarios-listado-" + actividadId);
+          cargarComentarios(actividadId, comentariosDiv);
+        } catch (err) {
+          erroresDiv.textContent = "Error al enviar comentario.";
+        }
+      });
+    });
+
+    async function cargarComentarios(actividadId, contenedor) {
+      try {
+        const res = await fetch(`/actividad/${actividadId}/comentarios`);
+        const comentarios = await res.json();
+
+        if (comentarios.length === 0) {
+          contenedor.innerHTML = "<p>No hay comentarios aún.</p>";
+          return;
+        }
+
+        contenedor.innerHTML = comentarios.map(c => `
+          <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;">
+            <strong>${c.nombre}</strong> <small>${c.fecha}</small>
+            <p>${c.texto}</p>
+          </div>
+        `).join('');
+      } catch (err) {
+        contenedor.innerHTML = "<p>Error al cargar comentarios.</p>";
+      }
+    }
+  });
+</script>
+{% endblock %}

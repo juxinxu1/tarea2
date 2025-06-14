@@ -6,5 +6,10 @@
   "insert_foto": "INSERT INTO foto (ruta_archivo, nombre_archivo, actividad_id) VALUES (%s, %s, %s)",
   "get_all_regiones": "SELECT id, nombre FROM region ORDER BY nombre",
   "get_comunas_by_region": "SELECT id, nombre FROM comuna WHERE region_id = %s ORDER BY nombre",
-  "get_last_actividades": "SELECT a.id, a.nombre, a.descripcion, a.dia_hora_inicio, MIN(f.ruta_archivo) AS ruta_archivo FROM actividad a LEFT JOIN foto f ON a.id = f.actividad_id GROUP BY a.id ORDER BY a.dia_hora_inicio DESC LIMIT %s"
+  "get_last_actividades": "SELECT a.id, a.nombre, a.descripcion, a.dia_hora_inicio, MIN(f.ruta_archivo) AS ruta_archivo FROM actividad a LEFT JOIN foto f ON a.id = f.actividad_id GROUP BY a.id ORDER BY a.dia_hora_inicio DESC LIMIT %s",
+  "estadisticas_actividades_por_dia": "SELECT DATE(dia_hora_inicio) AS fecha, COUNT(*) AS cantidad FROM actividad GROUP BY fecha ORDER BY fecha",
+  "estadisticas_actividades_por_tema": "SELECT tema, COUNT(*) AS cantidad FROM actividad_tema GROUP BY tema",
+  "estadisticas_actividades_por_mes_momento": "SELECT DATE_FORMAT(dia_hora_inicio, '%Y-%m') AS mes, SUM(CASE WHEN HOUR(dia_hora_inicio) < 12 THEN 1 ELSE 0 END) AS manana, SUM(CASE WHEN HOUR(dia_hora_inicio) BETWEEN 12 AND 16 THEN 1 ELSE 0 END) AS mediodia, SUM(CASE WHEN HOUR(dia_hora_inicio) > 16 THEN 1 ELSE 0 END) AS tarde FROM actividad GROUP BY mes ORDER BY mes",
+  "insert_comentario": "INSERT INTO comentario (nombre, texto, fecha, actividad_id) VALUES (%s, %s, NOW(), %s)",
+  "get_comentarios_por_actividad": "SELECT nombre, texto, fecha FROM comentario WHERE actividad_id = %s ORDER BY fecha DESC"
 }
