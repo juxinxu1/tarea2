@@ -91,5 +91,44 @@ def get_last_actividades(limit=5):
                 LIMIT %s
             """, (limit,))
             return cursor.fetchall()
+        
+def get_estadisticas():
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(QUERY_DICT["estadisticas_actividades_por_dia"])
+            actividades_por_dia = cursor.fetchall()
+
+            cursor.execute(QUERY_DICT["estadisticas_actividades_por_tema"])
+            actividades_por_tema = cursor.fetchall()
+
+            cursor.execute(QUERY_DICT["estadisticas_actividades_por_mes_momento"])
+            actividades_por_mes_momento = cursor.fetchall()
+
+    return {
+        "actividades_por_dia": actividades_por_dia,
+        "actividades_por_tema": actividades_por_tema,
+        "actividades_por_mes_momento": actividades_por_mes_momento
+    }
+
+def insert_comentario(nombre, texto, actividad_id):
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO comentario (nombre, texto, fecha, actividad_id)
+                VALUES (%s, %s, NOW(), %s)
+            """, (nombre, texto, actividad_id))
+        conn.commit()
+
+def get_comentarios_by_actividad(actividad_id):
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT nombre, texto, DATE_FORMAT(fecha, '%%d-%%m-%%Y %%H:%%i') AS fecha
+                FROM comentario
+                WHERE actividad_id = %s
+                ORDER BY fecha DESC
+            """, (actividad_id,))
+            return cursor.fetchall()
+
 
 

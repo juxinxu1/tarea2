@@ -4,8 +4,13 @@ import os
 import hashlib
 import filetype
 import traceback
-from database.db import insert_actividad, insert_contacto, insert_tema, insert_foto, get_all_regiones, get_comunas_by_region, get_last_actividades
+from database.db import (
+    insert_actividad, insert_contacto, insert_tema, insert_foto,
+    get_all_regiones, get_comunas_by_region, get_last_actividades,
+    get_estadisticas, get_conn
+)
 from utils.validations import validate_activity_form
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "actividad_secreta"
@@ -29,12 +34,14 @@ def api_comunas(region_id):
     comunas = get_comunas_by_region(region_id)
     return jsonify(comunas)
 
-# ---- Páginas web ----
+# ---- Página principal ----
 
 @app.route('/')
 def index():
     actividades = get_last_actividades(5)
     return render_template('index.html', actividades=actividades)
+
+# ---- Agregar actividad ----
 
 @app.route('/agregar_actividad', methods=['GET', 'POST'])
 def agregar_actividad():
@@ -93,14 +100,72 @@ def agregar_actividad():
 
     return render_template('agregar_actividad.html')
 
+# ---- Lista de actividades ----
+
 @app.route('/lista_actividades')
 def lista_actividades():
     actividades = get_last_actividades(5)
     return render_template('lista_actividades.html', actividades=actividades)
 
+# ---- API de estadísticas ----
+
+@app.route('/api/estadisticas')
+def api_estadisticas():
+    try:
+        datos = get_estadisticas()
+        return jsonify(datos)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/estadisticas')
 def estadisticas():
     return render_template('estadisticas.html')
+
+# ---- Comentarios ----
+
+@app.route('/actividad/<int:actividad_id>/comentarios', methods=['GET'])
+def obtener_comentarios(actividad_id):
+    conexion = get_conn()
+    with conexion.cursor() as cursor:
+        cursor.execute("""
+            SELECT nombre, texto, DATE_FORMAT(fecha, '%%d-%%m-%%Y %%H:%%i') AS fecha
+            FROM comentario
+            WHERE actividad_id = %s
+            ORDER BY fecha DESC
+        """, (actividad_id,))
+        comentarios = cursor.fetchall()
+    conexion.close()
+    return jsonify(comentarios)
+
+@app.route('/actividad/<int:actividad_id>/comentarios', methods=['POST'])
+def agregar_comentario(actividad_id):
+    data = request.get_json()
+    nombre = data.get("nombre", "").strip()
+    texto = data.get("texto", "").strip()
+
+    errores = []
+
+    if not nombre or len(nombre) < 3 or len(nombre) > 80:
+        errores.append("El nombre debe tener entre 3 y 80 caracteres.")
+
+    if not texto or len(texto) < 5:
+        errores.append("El comentario debe tener al menos 5 caracteres.")
+
+    if errores:
+        return jsonify({"errores": errores}), 400
+
+    conexion = get_conn()
+    with conexion.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO comentario (nombre, texto, fecha, actividad_id)
+            VALUES (%s, %s, NOW(), %s)
+        """, (nombre, texto, actividad_id))
+        conexion.commit()
+    conexion.close()
+
+    return jsonify({"mensaje": "Comentario agregado exitosamente"}), 200
+
+# ---- Run ----
 
 if __name__ == '__main__':
     app.run(debug=True)
