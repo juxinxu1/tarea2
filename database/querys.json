@@ -11,5 +11,6 @@
   "estadisticas_actividades_por_tema": "SELECT tema, COUNT(*) AS cantidad FROM actividad_tema GROUP BY tema",
   "estadisticas_actividades_por_mes_momento": "SELECT DATE_FORMAT(dia_hora_inicio, '%Y-%m') AS mes, SUM(CASE WHEN HOUR(dia_hora_inicio) < 12 THEN 1 ELSE 0 END) AS manana, SUM(CASE WHEN HOUR(dia_hora_inicio) BETWEEN 12 AND 16 THEN 1 ELSE 0 END) AS mediodia, SUM(CASE WHEN HOUR(dia_hora_inicio) > 16 THEN 1 ELSE 0 END) AS tarde FROM actividad GROUP BY mes ORDER BY mes",
   "insert_comentario": "INSERT INTO comentario (nombre, texto, fecha, actividad_id) VALUES (%s, %s, NOW(), %s)",
-  "get_comentarios_por_actividad": "SELECT nombre, texto, fecha FROM comentario WHERE actividad_id = %s ORDER BY fecha DESC"
+  "get_comentarios_por_actividad": "SELECT nombre, texto, DATE_FORMAT(fecha, '%%d-%%m-%%Y %%H:%%i') AS fecha FROM comentario WHERE actividad_id = %s ORDER BY fecha DESC",
+  "insert_nota": "INSERT INTO nota (nota, actividad_id) VALUES (%s, %s)"
 }

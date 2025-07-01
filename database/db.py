@@ -64,34 +64,9 @@ def get_comunas_by_region(region_id):
 def get_last_actividades(limit=5):
     with get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    a.id,
-                    a.nombre,
-                    a.descripcion,
-                    a.sector,
-                    a.email,
-                    a.celular,
-                    a.dia_hora_inicio,
-                    MAX(f.ruta_archivo) AS ruta_archivo,
-                    GROUP_CONCAT(DISTINCT at.tema) AS tema,
-                    GROUP_CONCAT(DISTINCT at.glosa_otro) AS glosa_otro,
-                    c.nombre AS comuna,
-                    r.nombre AS region,
-                    GROUP_CONCAT(DISTINCT cp.nombre) AS red_social,
-                    GROUP_CONCAT(DISTINCT cp.identificador) AS contacto
-                FROM actividad a
-                LEFT JOIN foto f ON a.id = f.actividad_id
-                LEFT JOIN actividad_tema at ON a.id = at.actividad_id
-                LEFT JOIN contactar_por cp ON a.id = cp.actividad_id
-                JOIN comuna c ON a.comuna_id = c.id
-                JOIN region r ON c.region_id = r.id
-                GROUP BY a.id
-                ORDER BY a.dia_hora_inicio DESC
-                LIMIT %s
-            """, (limit,))
+            cursor.execute(QUERY_DICT["get_last_actividades"], (limit,))
             return cursor.fetchall()
-        
+
 def get_estadisticas():
     with get_conn() as conn:
         with conn.cursor() as cursor:
@@ -113,22 +88,38 @@ def get_estadisticas():
 def insert_comentario(nombre, texto, actividad_id):
     with get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO comentario (nombre, texto, fecha, actividad_id)
-                VALUES (%s, %s, NOW(), %s)
-            """, (nombre, texto, actividad_id))
+            cursor.execute(QUERY_DICT["insert_comentario"], (nombre, texto, actividad_id))
         conn.commit()
 
 def get_comentarios_by_actividad(actividad_id):
     with get_conn() as conn:
         with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT nombre, texto, DATE_FORMAT(fecha, '%%d-%%m-%%Y %%H:%%i') AS fecha
-                FROM comentario
-                WHERE actividad_id = %s
-                ORDER BY fecha DESC
-            """, (actividad_id,))
+            cursor.execute(QUERY_DICT["get_comentarios_por_actividad"], (actividad_id,))
             return cursor.fetchall()
 
+def insert_nota(actividad_id, nota):
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(QUERY_DICT["insert_nota"], (actividad_id, nota))
+        conn.commit()
 
+def get_actividades_con_promedio():
+    with get_conn() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    a.id,
+                    a.nombre,
+                    a.descripcion,
+                    a.sector,
+                    a.dia_hora_inicio,
+                    c.nombre AS comuna,
+                    IFNULL(ROUND(AVG(n.nota),2), NULL) AS promedio
+                FROM actividad a
+                JOIN comuna c ON a.comuna_id = c.id
+                LEFT JOIN nota n ON a.id = n.actividad_id
+                GROUP BY a.id
+                ORDER BY a.dia_hora_inicio DESC
+            """)
+            return cursor.fetchall()
 
