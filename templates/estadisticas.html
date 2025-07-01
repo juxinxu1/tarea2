@@ -2,36 +2,145 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estadísticas</title>
-  <!-- Carga correcta de styles.css -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <title>Estadísticas de Actividades</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .chart-container {
+      width: 90%;
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .back-button {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .back-button a {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+
+    .back-button a:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Estadísticas</h1>
-    <a href="{{ url_for('index') }}">Volver a la portada</a>
-  </header>
 
-  <main>
-    <section id="estadisticas-charts">
-      <h2>Gráfico de Líneas: Actividades por Día</h2>
-      <canvas id="chart-line"></canvas>
+  <h1>Estadísticas de Actividades</h1>
 
-      <h2>Gráfico de Torta: Actividades por Tipo</h2>
-      <canvas id="chart-pie"></canvas>
+  <div class="chart-container">
+    <h2>Cantidad de Actividades por Día</h2>
+    <canvas id="lineChart"></canvas>
+  </div>
 
-      <h2>Gráfico de Barras: Actividades por Mes y Horario</h2>
-      <canvas id="chart-bar"></canvas>
-    </section>
-    <a href="{{ url_for('index') }}" class="back-link">Volver a la portada</a>
-  </main>
+  <div class="chart-container">
+    <h2>Actividades por Tipo (Tema)</h2>
+    <canvas id="pieChart"></canvas>
+  </div>
 
-  <!-- Se incluye Chart.js desde CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- Carga correcta del script.js -->
-  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  <div class="chart-container">
+    <h2>Actividades por Mes y Momento del Día</h2>
+    <canvas id="barChart"></canvas>
+  </div>
+
+  <div class="back-button">
+    <a href="{{ url_for('index') }}">← Volver a la portada</a>
+  </div>
+
+  <script>
+    async function cargarDatos() {
+      const response = await fetch('/api/estadisticas');
+      const data = await response.json();
+
+      // Gráfico de líneas
+      new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+          labels: data.actividades_por_dia.map(d => d.fecha),
+          datasets: [{
+            label: 'Actividades',
+            data: data.actividades_por_dia.map(d => d.cantidad),
+            fill: false,
+            borderColor: '#007BFF',
+            tension: 0.1
+          }]
+        }
+      });
+
+      // Gráfico de torta
+      new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+          labels: data.actividades_por_tema.map(t => t.tema),
+          datasets: [{
+            data: data.actividades_por_tema.map(t => t.cantidad),
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+          }]
+        }
+      });
+
+      // Gráfico de barras por mes y momento del día
+      const labels = data.actividades_por_mes_momento.map(e => e.mes);
+      const manana = data.actividades_por_mes_momento.map(e => e.manana);
+      const mediodia = data.actividades_por_mes_momento.map(e => e.mediodia);
+      const tarde = data.actividades_por_mes_momento.map(e => e.tarde);
+
+      new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Mañana',
+              data: manana,
+              backgroundColor: '#36A2EB'
+            },
+            {
+              label: 'Mediodía',
+              data: mediodia,
+              backgroundColor: '#FFCE56'
+            },
+            {
+              label: 'Tarde',
+              data: tarde,
+              backgroundColor: '#FF6384'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+          }
+        }
+      });
+    }
+
+    window.onload = cargarDatos;
+  </script>
+
 </body>
 </html>
+  
+
 

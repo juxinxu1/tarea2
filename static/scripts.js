@@ -88,4 +88,5 @@ document.addEventListener("DOMContentLoaded", function () {
     confirmation.style.display = "none";
     form.style.display = "block";
   });
+  
 });

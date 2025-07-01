@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Calificar Actividades{% endblock %}
+
+{% block content %}
+<h2>Actividades Realizadas - Calificación</h2>
+
+<div class="actividades">
+  {% for actividad in actividades %}
+    <div class="activity-card">
+      <h3>{{ actividad.nombre }}</h3>
+      <p><strong>Fecha de inicio:</strong> {{ actividad.dia_hora_inicio }}</p>
+      <p><strong>Comuna:</strong> {{ actividad.comuna }}</p>
+      <p><strong>Sector:</strong> {{ actividad.sector or 'Sin sector' }}</p>
+      <p><strong>Descripción:</strong> {{ actividad.descripcion }}</p>
+      <p><strong>Promedio de Notas:</strong> {{ actividad.promedio if actividad.promedio else 'Sin notas' }}</p>
+
+      <label for="nota-{{ actividad.id }}">Agregar Nota (1 a 7):</label>
+      <input type="number" min="1" max="7" id="nota-{{ actividad.id }}">
+      <button onclick="guardarNota({{ actividad.id }})">Guardar Nota</button>
+
+      <p id="msg-{{ actividad.id }}" class="msg"></p>
+    </div>
+  {% endfor %}
+</div>
+
+<a href="{{ url_for('index') }}">Volver a la portada</a>
+
+<script>
+function guardarNota(actividadId) {
+  const notaInput = document.getElementById('nota-' + actividadId);
+  const nota = parseInt(notaInput.value);
+  const msg = document.getElementById('msg-' + actividadId);
+
+  if (isNaN(nota) || nota < 1 || nota > 7) {
+    msg.textContent = "Por favor ingrese una nota válida entre 1 y 7.";
+    msg.style.color = "red";
+    return;
+  }
+
+  fetch(`/api/actividad/${actividadId}/notas`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ nota: nota })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.mensaje) {
+      msg.textContent = data.mensaje;
+      msg.style.color = "green";
+      // Recargar la página para ver el promedio actualizado
+      setTimeout(() => { location.reload(); }, 1000);
+    } else if (data.error) {
+      msg.textContent = data.error;
+      msg.style.color = "red";
+    }
+  })
+  .catch(error => {
+    msg.textContent = "Error al guardar la nota.";
+    msg.style.color = "red";
+  });
+}
+</script>
+
+{% endblock %}
+
